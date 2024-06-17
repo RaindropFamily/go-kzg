@@ -6,7 +6,70 @@ package kzg
 import (
 	"github.com/protolambda/go-kzg/bls"
 	"testing"
+	"os"
+	"io"
+	"io/ioutil"
 )
+
+func TestKZGforBitcoinRollups(t *testing.T){
+	// testing_scale := 12
+	fs := NewFFTSettings(12)
+	s1, s2 := GenerateTestingSetup("1927409816240961209460912649124", 1 << 12)
+	ks := NewKZGSettings(fs, s1, s2)
+	// for i := 0; i < len(ks.SecretG1); i++ {
+	// 	t.Logf("secret g1 %d: %s", i, bls.StrG1(&ks.SecretG1[i]))
+	// }
+
+	poly_to_commit := make([]bls.Fr, uint64(1)<<12)
+	for i := 0; i < len(poly_to_commit); i++ {
+		poly_to_commit[i] = *bls.RandomFr()
+	}
+
+	commitment := ks.CommitToPoly(poly_to_commit)
+	
+	point_to_evaluate_at := *bls.RandomFr()
+	var value bls.Fr
+	bls.EvalPolyAt(&value, poly_to_commit, &point_to_evaluate_at)
+
+	proof := ks.ComputeProofSingleFr(poly_to_commit, point_to_evaluate_at)
+
+	if !ks.CheckProofSingle(commitment, proof, &point_to_evaluate_at, &value) {
+		t.Fatal("could not verify proof")
+	}
+
+	content_x := bls.FrStr(&point_to_evaluate_at)
+	content_y := bls.FrStr(&value)
+
+	var x_recover bls.Fr
+	var y_recover bls.Fr
+	bls.SetFr(&x_recover, content_x)
+	bls.SetFr(&y_recover, content_y)
+
+	if x_recover != point_to_evaluate_at {
+		t.Fatal("x not match")
+	}
+	if y_recover != value {
+		t.Fatal("y not match")
+	}
+
+	f_x, _ := os.Create("./tmp/data1_x")
+	f_y, _ := os.Create("./tmp/data1_y")
+	io.WriteString(f_x, content_x) 
+	io.WriteString(f_y, content_y) 
+	f_x.Close()
+	f_y.Close()
+
+	read_x, _:= ioutil.ReadFile("./tmp/data1_x")
+	read_y, _:= ioutil.ReadFile("./tmp/data1_y")
+	str_x := string(read_x)
+	str_y := string(read_y)
+	if str_x != content_x {
+		t.Fatal("x read not match")
+	}
+	if str_y != content_y {
+		t.Fatal("y read not match")
+	}
+}
 
 func TestKZGSettings_CommitToEvalPoly(t *testing.T) {
 	fs := NewFFTSettings(4)

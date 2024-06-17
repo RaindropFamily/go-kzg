@@ -53,6 +53,24 @@ func (ks *KZGSettings) ComputeProofSingle(poly []bls.Fr, x uint64) *bls.G1Point 
 	return bls.LinCombG1(ks.SecretG1[:len(quotientPolynomial)], quotientPolynomial)
 }
 
+func (ks *KZGSettings) ComputeProofSingleFr(poly []bls.Fr, tmp bls.Fr) *bls.G1Point {
+	// divisor = [-x, 1]
+	divisor := [2]bls.Fr{}
+	bls.SubModFr(&divisor[0], &bls.ZERO, &tmp)
+	bls.CopyFr(&divisor[1], &bls.ONE)
+	//for i := 0; i < 2; i++ {
+	//	fmt.Printf("div poly %d: %s\n", i, FrStr(&divisor[i]))
+	//}
+	// quot = poly / divisor
+	quotientPolynomial := polyLongDiv(poly, divisor[:])
+	//for i := 0; i < len(quotientPolynomial); i++ {
+	//	fmt.Printf("quot poly %d: %s\n", i, FrStr(&quotientPolynomial[i]))
+	//}
+
+	// evaluate quotient poly at shared secret, in G1
+	return bls.LinCombG1(ks.SecretG1[:len(quotientPolynomial)], quotientPolynomial)
+}
+
 // Check a proof for a KZG commitment for an evaluation f(x) = y
 func (ks *KZGSettings) CheckProofSingle(commitment *bls.G1Point, proof *bls.G1Point, x *bls.Fr, y *bls.Fr) bool {
 	// Verify the pairing equation
