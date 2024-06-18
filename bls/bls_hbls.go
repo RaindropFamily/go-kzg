@@ -70,6 +70,12 @@ func StrG1(v *G1Point) string {
 	return (*hbls.G1)(v).GetString(10)
 }
 
+func SetG1(dst *G1Point, v string) {
+	if err := (*hbls.G1)(dst).SetString(v, 10); err != nil {
+		panic(err)
+	}
+}
+
 func NegG1(dst *G1Point) {
 	// in-place should be safe here (TODO double check)
 	hbls.G1Neg((*hbls.G1)(dst), (*hbls.G1)(dst))
