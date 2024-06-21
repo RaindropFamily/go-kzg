@@ -112,6 +112,12 @@ func StrG2(v *G2Point) string {
 	return (*hbls.G2)(v).GetString(10)
 }
 
+func SetG2(dst *G2Point, v string) {
+	if err := (*hbls.G2)(dst).SetString(v, 10); err != nil {
+		panic(err)
+	}
+}
+
 func EqualG1(a *G1Point, b *G1Point) bool {
 	return (*hbls.G1)(a).IsEqual((*hbls.G1)(b))
 }

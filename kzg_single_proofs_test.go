@@ -37,6 +37,16 @@ func TestKZGforBitcoinRollups(t *testing.T){
 		t.Fatal("could not verify proof")
 	}
 
+	commitment_string := bls.StrG1(commitment)
+	proof_string := bls.StrG1(proof)
+	var commitment_recover bls.G1Point
+	var proof_recover bls.G1Point
+	bls.SetG1(&commitment_recover, commitment_string)
+	bls.SetG1(&proof_recover, proof_string)
+	if !ks.CheckProofSingle(&commitment_recover, &proof_recover, &point_to_evaluate_at, &value) {
+		t.Fatal("could not verify proof2")
+	}
+
 	content_x := bls.FrStr(&point_to_evaluate_at)
 	content_y := bls.FrStr(&value)
 

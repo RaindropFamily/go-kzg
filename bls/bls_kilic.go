@@ -60,6 +60,16 @@ func StrG1(v *G1Point) string {
 	return a.String() + "\n" + b.String()
 }
 
+// func SetG1(dst *G1Point, v string) {
+// 	resv := strings.Split(v, "\n")
+// 	thebytes := []byte(resv)
+// 	G1Point = kbls.FromBytes(thebytes)
+// 	var bv big.Int
+// 	bv.SetString(v, 10)
+// 	(*kbls.Fr)(dst).RedFromBytes(bv.Bytes())
+// 	https://github.com/kilic/bls12-381/blob/ca162e8a70f456f4cf733097edfd60d0e9deca2c/g1.go#L110
+// }
+
 func NegG1(dst *G1Point) {
 	// in-place should be safe here (TODO double check)
 	kbls.NewG1().Neg((*kbls.PointG1)(dst), (*kbls.PointG1)(dst))
