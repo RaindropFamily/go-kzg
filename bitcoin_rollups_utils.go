@@ -6,6 +6,7 @@ import (
 	"os"
 	"io"
 	"io/ioutil"
+	// "fmt"
 )
 
 var num_of_commitments uint64
@@ -34,8 +35,8 @@ func ProposerCommit(ks *KZGSettings) ([]string, [][]bls.Fr) {
 		all_poly[j] = make([]bls.Fr, epsilon_power)
 		for i := 0; i < len(all_poly[j]); i++ {
 			all_poly[j][i] = *bls.RandomFr()
-			all_commitments[i] = bls.StrG1(ks.CommitToPoly(all_poly[j]))
 		}
+		all_commitments[j] = bls.StrG1(ks.CommitToPoly(all_poly[j]))
 	}
 	return all_commitments, all_poly
 }
@@ -77,7 +78,7 @@ func ValidatorCheck(ks *KZGSettings, content_x string, all_commitments []string,
 		bls.SetG1(&commitment, all_commitments[j])
 
 		var proof bls.G1Point
-		bls.SetG1(&proof, all_commitments[j])
+		bls.SetG1(&proof, all_proof[j])
 		
 		if !ks.CheckProofSingle(&commitment, &proof, &point_to_evaluate_at, &evaluation_j){
 			return false
